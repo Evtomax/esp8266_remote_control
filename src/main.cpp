@@ -407,6 +407,7 @@ void mqttReconnect() {
 
       String condMqttRoot = cond_topic;
       mqttClient.subscribe((condMqttRoot + "/temp").c_str());
+      mqttClient.subscribe((condMqttRoot + "/power").c_str());
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqttClient.state());
@@ -484,6 +485,18 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
       }
       buf[length] = 0;
       currentState.temperature = atoi(buf);
+      sendSettings();
+    }   
+  }
+  else if (strcmp(topic ,((String)cond_topic + "/power").c_str()) == 0){
+   if (payloadCompare(payload, length, "ON"))
+    {
+      currentState.power = 1;
+      sendSettings();
+    }
+    else if (payloadCompare(payload, length, "OFF"))
+    {
+      currentState.power = 0;
       sendSettings();
     }   
   }
