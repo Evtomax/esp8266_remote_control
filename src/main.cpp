@@ -30,6 +30,8 @@ void saveConfigCallback () {
   shouldSaveConfig = true;
 }
 
+char cond_topic[] = "cond";
+
 char mqtt_server[40] = "";
 char mqtt_login[40] = "";
 char mqtt_password[40] = "";
@@ -402,6 +404,9 @@ void mqttReconnect() {
       mqttClient.subscribe("/all_lights");
       mqttClient.subscribe("/rpi1_sensors/motion");
       mqttClient.subscribe("/rpi1_sensors/lux");
+
+      String condMqttRoot = cond_topic;
+      mqttClient.subscribe((condMqttRoot + "/temp").c_str());
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqttClient.state());
@@ -466,11 +471,21 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   else if (strcmp(topic, "/rpi1_sensors/lux") == 0){
     if (length < (sizeof(buf))){
       for (unsigned int i=0; i<length; ++i){
-        buf[i] = payload[i];
-        rpi1_lux = atoi(buf);
+        buf[i] = payload[i];       
       }
       buf[length] = 0;
+      rpi1_lux = atoi(buf);
     }
+  }
+  else if (strcmp(topic ,((String)cond_topic + "/temp").c_str()) == 0){
+    if (length < (sizeof(buf))){
+      for (unsigned int i=0; i<length; ++i){
+        buf[i] = payload[i];     
+      }
+      buf[length] = 0;
+      currentState.temperature = atoi(buf);
+      sendSettings();
+    }   
   }
 
   if (sw != nullptr){
