@@ -3,7 +3,7 @@
 Tested on model RAC/in-07HJ/N1_18Y.
 
 Condtitoner control features:
-* Set temperature by MQTT;
+* Set temperature, ON/OFF by MQTT;
 * ON/OFF by HTTP.
 
 Other features:
