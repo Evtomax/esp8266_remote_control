@@ -489,7 +489,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     }   
   }
   else if (strcmp(topic ,((String)cond_topic + "/power").c_str()) == 0){
-   if (payloadCompare(payload, length, "ON"))
+    if (payloadCompare(payload, length, "ON"))
     {
       currentState.power = 1;
       sendSettings();
@@ -499,6 +499,18 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
       currentState.power = 0;
       sendSettings();
     }   
+  }
+  else if (strcmp(topic ,((String)cond_topic + "/mode").c_str()) == 0){
+    if (payloadCompare(payload, length, "COOL")){
+      currentState.mode = MODE_COOL;
+    }
+    else if (payloadCompare(payload, length, "FAN")){
+      currentState.mode = MODE_FAN;
+    }
+    else if (payloadCompare(payload, length, "HEAT")){
+      currentState.mode = MODE_HEAT;
+    }
+    sendSettings();
   }
 
   if (sw != nullptr){
