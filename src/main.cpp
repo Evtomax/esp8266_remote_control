@@ -386,6 +386,12 @@ void setup(){
 
 }
 
+void ledSignal(){
+  led.on();
+  delay(10);
+  led.off();
+}
+
 void mqttReconnect() {
   // Loop until we're reconnected
   while (!mqttClient.connected()) {
@@ -408,6 +414,8 @@ void mqttReconnect() {
       String condMqttRoot = cond_topic;
       mqttClient.subscribe((condMqttRoot + "/temp").c_str());
       mqttClient.subscribe((condMqttRoot + "/power").c_str());
+      mqttClient.subscribe((condMqttRoot + "/mode").c_str());
+      mqttClient.subscribe((condMqttRoot + "/swing").c_str());
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqttClient.state());
@@ -486,6 +494,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
       buf[length] = 0;
       currentState.temperature = atoi(buf);
       sendSettings();
+      ledSignal();
     }   
   }
   else if (strcmp(topic ,((String)cond_topic + "/power").c_str()) == 0){
@@ -499,6 +508,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
       currentState.power = 0;
       sendSettings();
     }   
+    ledSignal();
   }
   else if (strcmp(topic ,((String)cond_topic + "/mode").c_str()) == 0){
     if (payloadCompare(payload, length, "COOL")){
@@ -511,6 +521,20 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
       currentState.mode = MODE_HEAT;
     }
     sendSettings();
+    ledSignal();
+  }
+  else if (strcmp(topic ,((String)cond_topic + "/swing").c_str()) == 0){
+    if (payloadCompare(payload, length, "ON"))
+    {
+      currentState.swing = 1;
+      sendSettings();
+    }
+    else if (payloadCompare(payload, length, "OFF"))
+    {
+      currentState.swing = 0;
+      sendSettings();
+    }   
+    ledSignal();
   }
 
   if (sw != nullptr){
